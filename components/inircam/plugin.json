@@ -1,0 +1,13 @@
+{
+  "id": "inircam",
+  "kind": "component",
+  "name": "Inircam",
+  "summary": "Desktop camera panel with local and remote RTSP/ONVIF support",
+  "icon": "videocam",
+  "version": "0.1.0",
+  "provides": "modules/inircam",
+  "parts": {
+    "panel": "Panel.qml"
+  },
+  "families": []
+}

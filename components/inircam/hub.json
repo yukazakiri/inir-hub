@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schema/hub.schema.json",
+  "version": "0.1.0",
+  "summary": "Desktop camera panel with local and remote RTSP/ONVIF support",
+  "description": "View and manage local and remote cameras from a panel. Supports RTSP streams (including Tapo-style URLs), probing connections, grid/wall/enlarged views, and pinnable camera windows.",
+  "authors": [
+    "yukazakiri"
+  ],
+  "license": "MIT",
+  "tags": ["camera", "video", "rtsp", "surveillance"],
+  "permissions": ["process", "network", "files"],
+  "hosts": [],
+  "minInir": "2.33.0",
+  "provides": "modules/inircam",
+  "preview": "preview.webp"
+}
