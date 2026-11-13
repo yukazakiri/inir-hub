@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.services
 
 // The grid: every camera as a live picture, in the columns the person picked.
 Item {
@@ -44,6 +45,7 @@ Item {
             Repeater {
                 model: root.cameras
                 delegate: Rectangle {
+                    id: tile
                     required property var modelData
                     required property int index
                     readonly property bool pinned: root.pinnedIds.indexOf(modelData.id) !== -1
@@ -59,10 +61,10 @@ Item {
 
                     CameraFeed {
                         anchors.fill: parent
-                        camera: parent.modelData
+                        camera: tile.modelData
                         quality: "sub"
                         muted: true
-                        active: parent.visible
+                        active: tile.visible
                     }
 
                     // The name, over the picture.
@@ -74,7 +76,7 @@ Item {
 
                         StyledText {
                             anchors { left: parent.left; leftMargin: 8; right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
-                            text: `${parent.parent.index + 1}. ${parent.parent.modelData.name || Translation.tr("Camera")}`
+                            text: `${tile.index + 1}. ${tile.modelData.name || Translation.tr("Camera")}`
                             color: Appearance.colors.colOnLayer0
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             elide: Text.ElideRight
@@ -84,7 +86,7 @@ Item {
                     // The pin mark, over the picture.
                     Rectangle {
                         anchors { right: parent.right; top: parent.top; margins: 6 }
-                        visible: parent.pinned
+                        visible: tile.pinned
                         width: pinGlyph.implicitWidth + 10
                         height: 20
                         radius: Appearance.rounding.verysmall
@@ -102,7 +104,7 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.cameraClicked(parent.parent.modelData.id)
+                        onClicked: root.cameraClicked(tile.modelData.id)
                     }
                 }
             }

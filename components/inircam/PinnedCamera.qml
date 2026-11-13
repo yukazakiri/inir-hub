@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.services
 
 // One pinned camera: a small floating card on the desktop, draggable and
 // resizable. It stays up while the panel is closed.
@@ -157,23 +158,23 @@ Item {
             PinAction {
                 icon: "volume_off"
                 tip: Translation.tr("Mute")
-                onClicked: feed.muted = !feed.muted
+                onTriggered: feed.muted = !feed.muted
             }
             PinAction {
                 icon: root.pin.onTop ? "vertical_align_top" : "vertical_align_bottom"
                 tip: root.pin.onTop ? Translation.tr("Keep above the windows") : Translation.tr("Keep on the desktop")
-                onClicked: root.topToggled(root.pin.id, !root.pin.onTop)
+                onTriggered: root.topToggled(root.pin.id, !root.pin.onTop)
             }
             PinAction {
                 icon: "open_in_full"
                 tip: Translation.tr("Open in the panel")
-                onClicked: if (root.camera) root.opened(root.camera.id)
+                onTriggered: if (root.camera) root.opened(root.camera.id)
             }
             PinAction {
                 icon: "close"
                 tip: Translation.tr("Unpin")
                 danger: true
-                onClicked: root.closed(root.pin.id)
+                onTriggered: root.closed(root.pin.id)
             }
         }
     }

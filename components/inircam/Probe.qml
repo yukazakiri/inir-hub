@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell.Io
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.services
 
 // Asks ffprobe about a stream: used by "Test connection" and to tell a wrong
 // password apart from an unreachable camera when playback fails (Qt only

@@ -4,13 +4,14 @@ import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
 import "Brands.js" as Brands
+import qs.services
 
 // Add a camera or change one: the name, the address, the login.
 Item {
     id: root
 
     required property var camera
-    required property var probe
+    required property Probe probe
 
     signal saved(var camera)
     signal cancelled()

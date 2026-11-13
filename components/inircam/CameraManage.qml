@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
 import "Brands.js" as Brands
+import qs.services
 
 // The camera list: every camera you have, with what to do to it.
 Item {
@@ -53,6 +54,7 @@ Item {
             spacing: 6
             model: root.cameras
             delegate: Rectangle {
+                id: entry
                 required property var modelData
                 required property int index
                 readonly property bool pinned: root.pinnedIds.indexOf(modelData.id) !== -1
@@ -61,7 +63,7 @@ Item {
                 height: 64
                 radius: Appearance.rounding.normal
                 color: Appearance.colors.colLayer2
-                border.color: Appearance.colors.colOutlineVariant
+                border.color: entry.pinned ? Appearance.colors.colPrimary : Appearance.colors.colOutlineVariant
                 border.width: 1
 
                 RowLayout {
@@ -75,14 +77,14 @@ Item {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: `${parent.parent.index + 1}. ${parent.parent.modelData.name || Translation.tr("Camera")}`
+                            text: `${entry.index + 1}. ${entry.modelData.name || Translation.tr("Camera")}`
                             color: Appearance.colors.colOnLayer2
                             font.pixelSize: Appearance.font.pixelSize.normal
                             elide: Text.ElideRight
                         }
                         StyledText {
                             Layout.fillWidth: true
-                            text: Brands.redact(Brands.streamUrl(parent.parent.modelData, "main")) || parent.parent.modelData.host || ""
+                            text: Brands.redact(Brands.streamUrl(entry.modelData, "main")) || entry.modelData.host || ""
                             color: Appearance.colors.colOnSurfaceVariant
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             elide: Text.ElideRight
@@ -90,17 +92,17 @@ Item {
                     }
 
                     RippleButton {
-                        buttonText: parent.parent.parent.pinned ? Translation.tr("Unpin") : Translation.tr("Pin")
-                        toggled: parent.parent.parent.pinned
-                        onClicked: root.pinToggled(parent.parent.parent.modelData.id)
+                        buttonText: entry.pinned ? Translation.tr("Unpin") : Translation.tr("Pin")
+                        toggled: entry.pinned
+                        onClicked: root.pinToggled(entry.modelData.id)
                     }
                     RippleButton {
                         buttonText: Translation.tr("Edit")
-                        onClicked: root.edited(parent.parent.parent.modelData)
+                        onClicked: root.edited(entry.modelData)
                     }
                     RippleButton {
                         buttonText: Translation.tr("Delete")
-                        onClicked: root.deleted(parent.parent.parent.modelData)
+                        onClicked: root.deleted(entry.modelData)
                     }
                 }
             }

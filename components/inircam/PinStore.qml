@@ -4,8 +4,11 @@ import qs.modules.common
 
 // The pinned cameras: which camera floats on the desktop, where, how wide.
 // Kept under the shell's state directory, its name starting with this item's id.
-QtObject {
+Item {
     id: root
+    visible: false
+    width: 0
+    height: 0
 
     readonly property string path: `${Directories.stateUserPath}/inircam-pins.json`
 

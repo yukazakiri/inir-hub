@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.services
 
 // Every camera at once, as a wall of pictures.
 Item {
@@ -31,6 +32,7 @@ Item {
         Repeater {
             model: root.cameras
             delegate: Rectangle {
+                id: tile
                 required property var modelData
                 required property int index
 
@@ -45,10 +47,10 @@ Item {
 
                 CameraFeed {
                     anchors.fill: parent
-                    camera: parent.modelData
+                    camera: tile.modelData
                     quality: "main"
                     muted: true
-                    active: parent.visible
+                    active: tile.visible
                 }
 
                 Rectangle {
@@ -59,7 +61,7 @@ Item {
 
                     StyledText {
                         anchors { left: parent.left; leftMargin: 8; right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
-                        text: parent.parent.modelData.name || Translation.tr("Camera")
+                        text: tile.modelData.name || Translation.tr("Camera")
                         color: Appearance.colors.colOnLayer0
                         font.pixelSize: Appearance.font.pixelSize.smaller
                         elide: Text.ElideRight
@@ -69,7 +71,7 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.cameraClicked(parent.parent.modelData.id)
+                    onClicked: root.cameraClicked(tile.modelData.id)
                 }
             }
         }

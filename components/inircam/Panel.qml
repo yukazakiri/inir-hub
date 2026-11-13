@@ -6,7 +6,6 @@ import Quickshell.Wayland
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.services
-import "Config.js" as Cfg
 import "Brands.js" as Brands
 
 // The camera panel: the grid of cameras, the enlarged view, the wall, the
@@ -23,7 +22,6 @@ Scope {
     property string notice: ""
 
     readonly property var cameras: store.enabledCameras()
-    readonly property var settings: Cfg.DEFAULTS
 
     function toggle() { root.open = !root.open }
     function close() {
@@ -105,8 +103,38 @@ Scope {
     CameraStore { id: store }
     PinStore { id: pins }
 
-    Probe { id: probe }
+    Probe { id: cameraProbe }
 
+    // RTSP feeds use external ffmpeg frame pullers (reliable across backends).
+    // Sync pullers when cameras change and keep them alive while the component is active.
+    readonly property string feedHelper: Qt.resolvedUrl("inircam-feeds").toString().replace(/^file:\/\//, "")
+    Process {
+        id: feedSync
+        running: false
+    }
+    function syncFeeds() {
+        if (!root.feedHelper || root.feedHelper.indexOf("inircam-feeds") === -1) return
+        feedSync.command = ["sh", "-c", 'test -x "$1" && "$1" sync || true', "sh", root.feedHelper]
+        feedSync.running = false
+        feedSync.running = true
+    }
+    Timer {
+        interval: 15000
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: root.syncFeeds()
+    }
+    Connections {
+        target: store
+        function onCamerasChanged() { root.syncFeeds() }
+    }
+
+    /// The camera panel: open or close it, open a camera, pin it to the desktop.
+    ///
+    /// ```kdl
+    /// Mod+Shift+C { spawn "inir" "inircam" "toggle"; }
+    /// ```
     IpcHandler {
         target: "inircam"
         /// Open or close the camera panel
@@ -327,7 +355,7 @@ Scope {
                             anchors.fill: parent
                             visible: root.view === "form"
                             camera: root.editing
-                            probe: probe
+                            probe: cameraProbe
                             onSaved: camera => root.saveCamera(camera)
                             onCancelled: { root.editing = null; root.view = "manage" }
                         }

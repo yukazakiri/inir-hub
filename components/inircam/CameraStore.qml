@@ -6,8 +6,11 @@ import qs.modules.common
 // The camera list, kept in this component's own file
 // (~/.config/inir/plugins/inircam.json, mode 600: it holds camera passwords).
 // Removing the component leaves the file as it was.
-QtObject {
+Item {
     id: root
+    visible: false
+    width: 0
+    height: 0
 
     readonly property string path: Directories.pluginFile("inircam")
 

@@ -1,12 +1,15 @@
 import QtQuick
 import QtMultimedia
 import Quickshell
+import Quickshell.Io
 import qs.modules.common
 import qs.modules.common.widgets
 import "Brands.js" as Brands
+import qs.services
 
-// One camera picture: the live stream, or what is known about it while it is not there.
-// Nothing is fetched while `active` is false: a feed nobody looks at costs nothing.
+// Live camera view. RTSP streams are pulled via ffmpeg into a continuously
+// updated JPEG frame (reliable across Qt Multimedia/VAAPI backends); other
+// sources use Qt Multimedia directly.
 Item {
     id: root
 
@@ -15,31 +18,71 @@ Item {
     property bool active: true
     property bool muted: true
     property int retrySeconds: 15
-    // Smallest delay; off buffers a little for unsteady networks.
     property bool lowLatency: true
 
-    readonly property url streamUrl: root.camera ? Brands.streamUrl(root.camera, root.quality) : ""
+    readonly property string streamUrlStr: root.camera ? Brands.streamUrl(root.camera, root.quality).toString() : ""
+    readonly property bool useFfmpeg: /^rtsps?:/i.test(root.streamUrlStr)
+    readonly property string framePath: "/tmp/inircam-feed-" + Quickshell.processId + "-" + (root.camera ? root.camera.id : "none") + "-" + root.quality + ".jpg"
 
     property string status: "idle"   // idle · connecting · live · error
     property string note: ""
+    property int _frameNonce: 0
+    property bool _ffmpegStarting: false
 
     signal snapshotSaved(string path)
     signal snapshotFailed(string reason)
 
     function start() {
-        if (!root.camera || root.streamUrl.toString() === "") {
+        retry.stop()
+        if (!root.camera || root.streamUrlStr === "") {
             root.status = "idle"
+            root.note = ""
             return
         }
         root.status = "connecting"
-        player.source = root.streamUrl
-        player.play()
+        root.note = ""
+        if (root.useFfmpeg) startFfmpeg()
+        else startPlayer()
     }
 
     function stop() {
+        retry.stop()
+        stopPlayer()
+        stopFfmpeg()
+        root.status = "idle"
+    }
+
+    function startPlayer() {
+        stopFfmpeg()
         player.stop()
         player.source = ""
-        root.status = "idle"
+        player.source = root.streamUrlStr
+        player.play()
+    }
+
+    function stopPlayer() {
+        player.stop()
+        player.source = ""
+    }
+
+    function startFfmpeg() {
+        // RTSP frames are supplied by the inircam-feeds helper (external ffmpeg).
+        // We only poll/display the frame file here.
+        stopPlayer()
+        stopFfmpeg(false)
+        root._ffmpegStarting = true
+        framePoll.interval = 1200
+        framePoll.restart()
+    }
+
+    function stopFfmpeg(resetState = true) {
+        framePoll.stop()
+        root._ffmpegStarting = false
+        // do not kill external ffmpeg here; helper manages process lifetime
+        if (resetState) {
+            root._frameNonce = 0
+            frameImg.source = ""
+        }
     }
 
     function takeSnapshot() {
@@ -47,48 +90,57 @@ Item {
             root.snapshotFailed(Translation.tr("No picture to save"))
             return
         }
-        const name = (root.camera.name || "camera").replace(/[^A-Za-z0-9 _-]/g, "_")
+        const name = ((root.camera && root.camera.name) || "camera").replace(/[^A-Za-z0-9 _-]/g, "_")
         const stamp = Qt.formatDateTime(new Date(), "yyyyMMdd-HHmmss")
         const path = `${Directories.picturesPath}/inircam-${name}-${stamp}.jpg`
-        video.grabToImage(function(result) {
-            if (result && result.saveToFile) {
-                root.snapshotSaved(path)
-            } else {
-                root.snapshotFailed(Translation.tr("The picture could not be saved"))
-            }
+        if (root.useFfmpeg) {
+            snapProc._path = path
+            snapProc.command = ["cp", root.framePath, path]
+            snapProc.running = true
+            return
+        }
+        const ok = video.grabToImage(function(result) {
+            if (result) root.snapshotSaved(path)
+            else root.snapshotFailed(Translation.tr("The picture could not be saved"))
         })
+        if (!ok) root.snapshotFailed(Translation.tr("The picture could not be saved"))
     }
 
     implicitWidth: 320
     implicitHeight: 180
 
-    onActiveChanged: if (root.active) root.start()
-    else root.stop()
-    onStreamUrlChanged: if (root.active) root.start()
+    onActiveChanged: root.active ? root.start() : root.stop()
+    onStreamUrlStrChanged: if (root.active) root.start()
     Component.onCompleted: if (root.active) root.start()
-    Component.onDestruction: root.stop()
+    Component.onDestruction: {
+        root.stop()
+        // best-effort cleanup of frame file
+        cleanupProc.command = ["rm", "-f", root.framePath]
+        cleanupProc.running = true
+    }
 
+    // ── Qt Multimedia path (non-RTSP) ───────────────────────────────────
     MediaPlayer {
         id: player
         videoOutput: video
         audioOutput: audio
+        loops: 1
         playbackOptions.playbackIntent: root.lowLatency
-            ? PlaybackOptions.PlaybackIntent.LowLatencyStreaming
-            : PlaybackOptions.PlaybackIntent.Playback
-        onMediaStatusChanged: {
-            if (root.status === "idle") return
-            if (mediaStatus === MediaPlayer.BufferedMedia) root.status = "connecting"
-            else if (mediaStatus === MediaPlayer.PlayingMedia) root.status = "live"
-            else if (mediaStatus === MediaPlayer.InvalidMedia || mediaStatus === MediaPlayer.EndOfMedia) {
-                root.status = "error"
-                root.note = Translation.tr("The camera stopped sending video")
-                root.retry.restart()
+
+        onPlaybackStateChanged: {
+            if (root.useFfmpeg) return
+            if (playbackState === MediaPlayer.PlayingState) root.status = "live"
+            else if (playbackState === MediaPlayer.StoppedState && root.active && root.status === "live") {
+                // unexpected stop -> reconnect
+                root.status = "connecting"
+                retry.restart()
             }
         }
         onErrorOccurred: function(error, errorString) {
+            if (root.useFfmpeg) return
             root.status = "error"
-            root.note = Translation.tr("The camera could not be reached")
-            root.retry.restart()
+            root.note = errorString || Translation.tr("The camera could not be reached")
+            retry.restart()
         }
     }
 
@@ -97,22 +149,72 @@ Item {
         muted: root.muted
     }
 
-    Timer {
-        id: retry
-        interval: Math.max(1, root.retrySeconds) * 1000
-        repeat: true
-        running: false
-        onTriggered: if (root.active) root.start()
-    }
-
     VideoOutput {
         id: video
         anchors.fill: parent
-        visible: root.status === "live"
+        visible: !root.useFfmpeg && root.status === "live"
         fillMode: VideoOutput.PreserveAspectCrop
     }
 
-    // The frame's own surface while the stream is still coming.
+    // ── ffmpeg frame path (RTSP, passive viewer) ──────────────────────
+    // External helper (inircam-feeds) keeps ffmpeg frame pullers running.
+
+    Timer {
+        id: framePoll
+        interval: 125
+        repeat: true
+        running: false
+        onTriggered: {
+            root._frameNonce++
+            frameImg.source = "file://" + root.framePath + "?t=" + root._frameNonce
+            // ramp to steady poll after initial delay
+            if (interval > 125) interval = 125
+        }
+    }
+
+    Image {
+        id: frameImg
+        anchors.fill: parent
+        visible: root.useFfmpeg
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: false
+        cache: false
+        smooth: true
+        source: ""
+        onStatusChanged: {
+            if (!root.useFfmpeg) return
+            if (status === Image.Ready) {
+                root._ffmpegStarting = false
+                root.status = "live"
+                root.note = ""
+            } else if (status === Image.Error) {
+                // file not ready yet while connecting; keep waiting
+                if (root.status !== "connecting") root.status = "connecting"
+            }
+        }
+    }
+
+    Process {
+        id: snapProc
+        property string _path: ""
+        onExited: (code) => {
+            if (code === 0) root.snapshotSaved(_path)
+            else root.snapshotFailed(Translation.tr("The picture could not be saved"))
+        }
+    }
+
+    Process {
+        id: cleanupProc
+    }
+
+    // ── Retry + status overlay ──────────────────────────────────────────
+    Timer {
+        id: retry
+        interval: Math.max(1, root.retrySeconds) * 1000
+        repeat: false
+        onTriggered: if (root.active) root.start()
+    }
+
     Rectangle {
         anchors.fill: parent
         color: Appearance.colors.colSurfaceContainerHighest
@@ -131,11 +233,8 @@ Item {
             iconSize: Appearance.font.pixelSize.huge
             color: Appearance.colors.colOnSurfaceVariant
             RotationAnimator on rotation {
-                running: root.status === "connecting" && root.visible
-                from: 0
-                to: 360
-                duration: 1100
-                loops: Animation.Infinite
+                running: root.status === "connecting"
+                from: 0; to: 360; duration: 1100; loops: Animation.Infinite
             }
         }
         StyledText {
@@ -153,6 +252,8 @@ Item {
             color: Appearance.colors.colOnSurfaceVariant
             font.pixelSize: Appearance.font.pixelSize.smaller
             elide: Text.ElideRight
+            maximumLineCount: 2
+            wrapMode: Text.Wrap
         }
     }
 }
