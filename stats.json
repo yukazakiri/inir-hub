@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-18T13:26:38Z",
+ "generated": "2026-11-19T13:53:41Z",
  "items": {
   "afterglyph": {
    "downloads": 1,
@@ -9,7 +9,7 @@
   },
   "airisu": {
    "downloads": 1,
-   "installs": 523,
+   "installs": 518,
    "up": 11,
    "down": 0,
    "reactions": {
@@ -20,13 +20,13 @@
   },
   "countdown": {
    "downloads": 1,
-   "installs": 45,
+   "installs": 41,
    "up": 3,
    "down": 0
   },
   "dev-stats": {
    "downloads": 0,
-   "installs": 13,
+   "installs": 17,
    "up": 0,
    "down": 0
   },
@@ -38,49 +38,46 @@
   },
   "fastfetch": {
    "downloads": 1,
-   "installs": 572,
-   "up": 7,
-   "down": 1,
-   "reactions": {
-    "❤️": 1
-   }
+   "installs": 580,
+   "up": 6,
+   "down": 1
   },
   "ii": {
    "downloads": 1,
-   "installs": 591,
+   "installs": 600,
    "up": 4,
    "down": 0
   },
   "inir-docker": {
    "downloads": 1,
-   "installs": 46,
+   "installs": 47,
    "up": 3,
    "down": 0
   },
   "inircam": {
    "downloads": 1,
-   "installs": 176,
+   "installs": 211,
    "up": 6,
    "down": 0
   },
   "inircam-widget": {
    "downloads": 0,
-   "installs": 32,
+   "installs": 40,
    "up": 0,
    "down": 0
   },
   "inirconnect": {
    "downloads": 0,
-   "installs": 64,
-   "up": 1,
+   "installs": 99,
+   "up": 3,
    "down": 1,
    "reactions": {
-    "🔥": 1
+    "🔥": 2
    }
   },
   "iris": {
    "downloads": 1,
-   "installs": 573,
+   "installs": 571,
    "up": 12,
    "down": 0,
    "reactions": {
@@ -90,11 +87,11 @@
   },
   "media-corner": {
    "downloads": 1,
-   "installs": 338,
+   "installs": 365,
    "up": 3,
    "down": 1,
    "reactions": {
-    "🔥": 1
+    "🔥": 2
    }
   },
   "moss-garden": {
@@ -111,13 +108,13 @@
   },
   "prism": {
    "downloads": 1,
-   "installs": 403,
+   "installs": 390,
    "up": 0,
    "down": 0
   },
   "radio": {
    "downloads": 1,
-   "installs": 39,
+   "installs": 38,
    "up": 1,
    "down": 0,
    "reactions": {
@@ -126,7 +123,7 @@
   },
   "shell-line": {
    "downloads": 1,
-   "installs": 45,
+   "installs": 47,
    "up": 0,
    "down": 0
   },
@@ -138,7 +135,7 @@
   },
   "waffle": {
    "downloads": 1,
-   "installs": 536,
+   "installs": 534,
    "up": 1,
    "down": 0
   }
