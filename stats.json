@@ -1,15 +1,15 @@
 {
- "generated": "2026-11-25T14:57:31Z",
+ "generated": "2026-11-26T14:27:53Z",
  "items": {
   "afterglyph": {
    "downloads": 1,
-   "installs": 107,
+   "installs": 117,
    "up": 5,
    "down": 0
   },
   "airisu": {
    "downloads": 1,
-   "installs": 1153,
+   "installs": 1199,
    "up": 19,
    "down": 0,
    "reactions": {
@@ -20,7 +20,7 @@
   },
   "countdown": {
    "downloads": 1,
-   "installs": 85,
+   "installs": 91,
    "up": 4,
    "down": 0,
    "reactions": {
@@ -29,19 +29,19 @@
   },
   "dev-stats": {
    "downloads": 0,
-   "installs": 38,
+   "installs": 44,
    "up": 1,
    "down": 0
   },
   "excalidraw": {
    "downloads": 1,
-   "installs": 81,
+   "installs": 85,
    "up": 3,
    "down": 0
   },
   "fastfetch": {
    "downloads": 1,
-   "installs": 1211,
+   "installs": 1257,
    "up": 8,
    "down": 1,
    "reactions": {
@@ -50,32 +50,32 @@
   },
   "ii": {
    "downloads": 1,
-   "installs": 1251,
+   "installs": 1300,
    "up": 7,
    "down": 0
   },
   "inir-docker": {
    "downloads": 1,
-   "installs": 79,
+   "installs": 84,
    "up": 3,
    "down": 0
   },
   "inircam": {
    "downloads": 1,
-   "installs": 510,
+   "installs": 557,
    "up": 6,
    "down": 0
   },
   "inircam-widget": {
    "downloads": 0,
-   "installs": 49,
+   "installs": 52,
    "up": 0,
    "down": 0
   },
   "inirconnect": {
    "downloads": 0,
-   "installs": 395,
-   "up": 4,
+   "installs": 442,
+   "up": 5,
    "down": 2,
    "reactions": {
     "🔥": 2
@@ -83,7 +83,7 @@
   },
   "iris": {
    "downloads": 1,
-   "installs": 1224,
+   "installs": 1273,
    "up": 19,
    "down": 0,
    "reactions": {
@@ -93,22 +93,22 @@
   },
   "media-corner": {
    "downloads": 1,
-   "installs": 723,
+   "installs": 771,
    "up": 3,
-   "down": 1,
+   "down": 2,
    "reactions": {
     "🔥": 2
    }
   },
   "moss-garden": {
    "downloads": 1,
-   "installs": 101,
+   "installs": 105,
    "up": 2,
    "down": 0
   },
   "paper-lantern": {
    "downloads": 1,
-   "installs": 72,
+   "installs": 77,
    "up": 3,
    "down": 0,
    "reactions": {
@@ -117,13 +117,13 @@
   },
   "prism": {
    "downloads": 1,
-   "installs": 857,
+   "installs": 904,
    "up": 1,
    "down": 0
   },
   "radio": {
    "downloads": 1,
-   "installs": 71,
+   "installs": 76,
    "up": 1,
    "down": 0,
    "reactions": {
@@ -132,19 +132,19 @@
   },
   "shell-line": {
    "downloads": 1,
-   "installs": 79,
+   "installs": 85,
    "up": 0,
    "down": 0
   },
   "tidepool": {
    "downloads": 1,
-   "installs": 122,
+   "installs": 128,
    "up": 0,
    "down": 0
   },
   "waffle": {
    "downloads": 1,
-   "installs": 1169,
+   "installs": 1216,
    "up": 1,
    "down": 0
   }
